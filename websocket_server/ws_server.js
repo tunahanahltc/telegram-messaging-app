@@ -1,6 +1,9 @@
 const WebSocket = require("ws");
 
-const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
+const PORT = process.env.PORT || 8765; // Render Cloud'un atadığı portu kullanın
+const wss = new WebSocket.Server({ port: PORT });
+console.log(`WebSocket sunucusu ${PORT} portunda çalışıyor.`);
+
 
 wss.on("connection", function connection(ws) {
   console.log("WebSocket bağlantısı kuruldu.");
@@ -30,4 +33,4 @@ wss.on("connection", function connection(ws) {
   });
 });
 
-console.log("WebSocket sunucusu 8765 portunda çalışıyor.");
+console.log("WebSocket sunucusu   portunda çalışıyor.");
