@@ -15,7 +15,7 @@ WEBSOCKET_URL = "wss://websocket-server-vubd.onrender.com"
 SESSION_FILE = "/tmp/session_name"
 
 # Render tarafından atanan PORT çevresel değişkenini al
-PORT = os.getenv("PORT", 8765)  # Varsayılan olarak 8765 portunu kullanıyoruz, ancak Render PORT verir
+PORT = os.getenv("PORT", 10000)  # Varsayılan olarak 8765 portunu kullanıyoruz, ancak Render PORT verir
 
 client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
 
