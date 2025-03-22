@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: telegram_listener
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python telegram_listener.py
+    envVars:
+      - key: API_ID
+        value: 9144604
+      - key: API_HASH
+        value: 8645242a0dffb9e10489ce2402f1790e
+      - key: PHONE_NUMBER
+        value: +905374761850
+    healthCheckPath: /health
+
+  - type: web
+    name: websocket_server
+    env: node
+    buildCommand: npm install
+    startCommand: node ws_server.js
+    envVars:
+      - key: PORT
+        value: 8765
+    healthCheckPath: /health

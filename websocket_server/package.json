@@ -1,13 +1,12 @@
 {
-  "name": "websocket-server",
+  "name": "websocket_server",
   "version": "1.0.0",
-  "description": "Telegram mesajlarını WebSocket ile yönetme",
+  "description": "WebSocket Server for Render",
   "main": "ws_server.js",
   "scripts": {
     "start": "node ws_server.js"
   },
   "dependencies": {
-    "ws": "^8.15.0",
-    "dotenv": "^16.4.3"
+    "ws": "^8.16.0"
   }
 }

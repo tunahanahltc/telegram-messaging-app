@@ -1,6 +1,9 @@
 const WebSocket = require("ws");
 
-const wss = new WebSocket.Server({ port: 8765 });
+// Render'ın atadığı portu kullan
+const PORT = process.env.PORT || 8765;
+
+const wss = new WebSocket.Server({ port: PORT });
 
 wss.on("connection", function connection(ws) {
   console.log("WebSocket bağlantısı kuruldu.");
@@ -12,4 +15,4 @@ wss.on("connection", function connection(ws) {
   });
 });
 
-console.log("WebSocket sunucusu 8765 portunda çalışıyor.");
+console.log(`WebSocket sunucusu ${PORT} portunda çalışıyor.`);
