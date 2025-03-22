@@ -1,5 +1,5 @@
-const WebSocket = require("ws");
-const http = require("http");
+const WebSocket = require("wss");
+const http = require("https");
 
 const server = http.createServer((req, res) => {
     if (req.url === "/health") {
