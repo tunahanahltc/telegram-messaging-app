@@ -1,0 +1,14 @@
+# Python için
+telegram_listener/__pycache__/
+telegram_listener/.env
+telegram_listener/*.session
+telegram_listener/*.session-journal
+
+# Node.js için
+websocket_server/node_modules/
+websocket_server/.env
+
+# Genel
+.DS_Store
+.vscode/
+.idea/
