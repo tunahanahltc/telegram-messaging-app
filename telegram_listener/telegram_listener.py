@@ -20,21 +20,23 @@ async def handle_phone_code():
     async with websockets.connect(WEBSOCKET_URL) as websocket:
         print("WebSocket'e bağlandı.")
 
-        # WebSocket sunucusuna telefon numarasını gönder
-        phone = input("Telefon numaranızı girin (örn. +901234567890): ")
-        await websocket.send(json.dumps({"action": "send_phone", "phone": phone}))
+        while True:
+            # WebSocket sunucusundan mesaj al
+            message = await websocket.recv()
+            data = json.loads(message)
 
-        # WebSocket sunucusundan kodu al
-        response = await websocket.recv()
-        response = json.loads(response)
+            if data.get("action") == "phone_received":
+                phone = data.get("phone")
+                print("Telefon numarası alındı:", phone)
 
-        if response.get("action") == "code_received":
-            code = response.get("code")
-            print("Telefon kodu alındı:", code)
+            if data.get("action") == "code_received":
+                code = data.get("code")
+                print("Telefon kodu alındı:", code)
 
-            # Telegram'a giriş yap
-            await client.start(phone=phone, code=code)
-            print("Telegram Listener başladı!")
+                # Telegram'a giriş yap
+                await client.start(phone=phone, code=code)
+                print("Telegram Listener başladı!")
+                break
 
 @client.on(events.NewMessage)
 async def handle_new_message(event):
