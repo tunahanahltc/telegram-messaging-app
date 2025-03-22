@@ -15,7 +15,7 @@ WEBSOCKET_URL = "wss://websocket-server-vubd.onrender.com"
 SESSION_FILE = "/tmp/session_name"
 
 # Render tarafından atanan PORT çevresel değişkenini al
-PORT = os.getenv("PORT", 10000)  # Varsayılan olarak 8765 portunu kullanıyoruz, ancak Render PORT verir
+PORT = os.getenv("PORT", 10000)  # Varsayılan olarak 10000 portunu kullanıyoruz
 
 client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
 
@@ -61,22 +61,6 @@ async def handle_new_message(event):
     async with websockets.connect(WEBSOCKET_URL) as websocket:
         await websocket.send(json.dumps(message_data))
 
-async def main():
-    # WebSocket bağlantısını aç
-    websocket = await connect_websocket()
-
-    # Telefon kodunu ve giriş işlemini başlat
-    await handle_phone_code(websocket)
-    
-    # Telegram istemcisini çalıştır
-    await client.run_until_disconnected()
-
-    # WebSocket sunucusunu belirtilen portta dinlemeye başla
-    server = await websockets.serve(websocket_handler, "0.0.0.0", int(PORT))
-    print(f"WebSocket sunucusu {PORT} portunda başlatıldı.")
-    await server.wait_closed()
-
-# WebSocket mesajlarını işlemek için handler fonksiyonu
 async def websocket_handler(websocket, path):
     async for message in websocket:
         data = json.loads(message)
@@ -86,6 +70,26 @@ async def websocket_handler(websocket, path):
         elif data.get("action") == "code_received":
             code = data.get("code")
             print(f"Kod alındı: {code}")
+
+async def start_websocket_server():
+    # WebSocket sunucusunu başlat
+    server = await websockets.serve(websocket_handler, "0.0.0.0", int(PORT))
+    print(f"WebSocket sunucusu {PORT} portunda başlatıldı.")
+    await server.wait_closed()
+
+async def main():
+    # WebSocket bağlantısını aç
+    websocket = await connect_websocket()
+
+    # Telefon kodunu ve giriş işlemini başlat
+    await handle_phone_code(websocket)
+    
+    # WebSocket sunucusunu başlat
+    await start_websocket_server()
+
+    # Telegram istemcisini çalıştır
+    await client.start()
+    await client.run_until_disconnected()
 
 if __name__ == "__main__":
     asyncio.run(main())
