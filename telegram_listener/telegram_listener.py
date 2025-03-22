@@ -16,32 +16,35 @@ SESSION_FILE = "/tmp/session_name"
 
 client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
 
-async def handle_phone_code():
-    async with websockets.connect(WEBSOCKET_URL) as websocket:
-        print("WebSocket'e bağlandı.")
+# WebSocket bağlantısı sadece bir kez açılacak
+async def connect_websocket():
+    return await websockets.connect(WEBSOCKET_URL)
 
-        while True:
-            # WebSocket sunucusundan mesaj al
-            message = await websocket.recv()
-            data = json.loads(message)
+# Telefon numarası ve kod alındığında Telegram giriş işlemi yapılacak
+async def handle_phone_code(websocket):
+    print("WebSocket'e bağlandı.")
+    
+    while True:
+        # WebSocket sunucusundan mesaj al
+        message = await websocket.recv()
+        data = json.loads(message)
 
-            if data.get("action") == "phone_received":
-                phone = data.get("phone")
-                print("Telefon numarası alındı:", phone)
+        if data.get("action") == "phone_received":
+            phone = data.get("phone")
+            print("Telefon numarası alındı:", phone)
 
-                # Telegram'dan kod talep et
-                await client.connect()
-                await client.send_code_request(phone)
-                print("Telegram'a kod talep edildi.")
+            # Telegram'dan kod talep et
+            await client.send_code_request(phone)
+            print("Telegram'a kod talep edildi.")
 
-            if data.get("action") == "code_received":
-                code = data.get("code")
-                print("Telefon kodu alındı:", code)
+        if data.get("action") == "code_received":
+            code = data.get("code")
+            print("Telefon kodu alındı:", code)
 
-                # Telegram'a giriş yap
-                await client.sign_in(phone, code)
-                print("Telegram Listener başladı!")
-                break
+            # Telegram'a giriş yap
+            await client.sign_in(phone, code)
+            print("Telegram Listener başladı!")
+            break
 
 @client.on(events.NewMessage)
 async def handle_new_message(event):
@@ -57,7 +60,13 @@ async def handle_new_message(event):
         await websocket.send(json.dumps(message_data))
 
 async def main():
-    await handle_phone_code()
+    # WebSocket bağlantısını aç
+    websocket = await connect_websocket()
+
+    # Telefon kodunu ve giriş işlemini başlat
+    await handle_phone_code(websocket)
+    
+    # Telegram istemcisini çalıştır
     await client.run_until_disconnected()
 
 if __name__ == "__main__":
