@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 
 // Render üzerindeki WebSocket sunucusuna bağlan
-const ws = new WebSocket('wss://websocket-server-vubd.onrender.com');
+const ws = new WebSocket('ws://websocket-server-vubd.onrender.com');
 
 ws.on('open', () => {
     console.log('WebSocket sunucusuna bağlandı.');
