@@ -1,18 +1,30 @@
-const WebSocket = require('ws');
+const WebSocket = require("ws");
+const http = require("http");
+const fetch = require("node-fetch");
 
-// Render üzerindeki WebSocket sunucusuna bağlan
-const ws = new WebSocket('ws://websocket-server-vubd.onrender.com');
+const wss = new WebSocket.Server({ port: 8080 });
 
-ws.on('open', () => {
-    console.log('WebSocket sunucusuna bağlandı.');
-    // Sunucuya mesaj gönder
-    ws.send('Merhaba, ben Node.js istemcisi!');
+wss.on("connection", (ws) => {
+    console.log("Client connected");
+    
+    ws.on("message", async (message) => {
+        try {
+            const data = JSON.parse(message);
+            const response = await fetch("http://localhost:8765", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            ws.send(JSON.stringify(result));
+        } catch (error) {
+            ws.send(JSON.stringify({ error: "Error processing request" }));
+        }
+    });
+    
+    ws.on("close", () => {
+        console.log("Client disconnected");
+    });
 });
 
-ws.on('message', (data) => {
-    console.log(`Sunucudan gelen yanıt: ${data}`);
-});
-
-ws.on('close', () => {
-    console.log('WebSocket bağlantısı kapatıldı.');
-});
+console.log("WebSocket server running on ws://localhost:8080");
