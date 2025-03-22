@@ -9,7 +9,7 @@ load_dotenv()
 
 API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
-WEBSOCKET_URL = os.getenv("WEBSOCKET_URL")  # Render Cloud WebSocket URL'si
+WEBSOCKET_URL = os.getenv("WEBSOCKET_URL")
 
 # Oturum dosyasını Render Cloud'un geçici depolama alanında sakla
 SESSION_FILE = "/tmp/session_name"
@@ -20,19 +20,21 @@ async def handle_phone_code():
     async with websockets.connect(WEBSOCKET_URL) as websocket:
         print("WebSocket'e bağlandı.")
 
-        # Telefon numarasını al
-        phone = await websocket.recv()
-        phone = json.loads(phone)["phone"]
-        print("Telefon numarası alındı:", phone)
+        # WebSocket sunucusuna telefon numarasını gönder
+        phone = input("Telefon numaranızı girin (örn. +901234567890): ")
+        await websocket.send(json.dumps({"action": "send_phone", "phone": phone}))
 
-        # Kodu al
-        code = await websocket.recv()
-        code = json.loads(code)["code"]
-        print("Telefon kodu alındı:", code)
+        # WebSocket sunucusundan kodu al
+        response = await websocket.recv()
+        response = json.loads(response)
 
-        # Telegram'a giriş yap
-        await client.start(phone=phone, code=code)
-        print("Telegram Listener başladı!")
+        if response.get("action") == "code_received":
+            code = response.get("code")
+            print("Telefon kodu alındı:", code)
+
+            # Telegram'a giriş yap
+            await client.start(phone=phone, code=code)
+            print("Telegram Listener başladı!")
 
 @client.on(events.NewMessage)
 async def handle_new_message(event):
