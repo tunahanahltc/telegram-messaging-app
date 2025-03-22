@@ -9,7 +9,7 @@ load_dotenv()
 
 API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
-WEBSOCKET_URL = os.getenv("wss://websocket-server-vubd.onrender.com")
+WEBSOCKET_URL = "wss://websocket-server-vubd.onrender.com"
 
 # Oturum dosyasını Render Cloud'un geçici depolama alanında sakla
 SESSION_FILE = "/tmp/session_name"
