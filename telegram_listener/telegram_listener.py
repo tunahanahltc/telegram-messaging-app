@@ -11,16 +11,18 @@ API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 WEBSOCKET_URL = "wss://websocket-server-vubd.onrender.com"
 
-# Oturum dosyasını Render Cloud'un geçici depolama alanında sakla
+# Render Cloud'un geçici depolama alanında oturum dosyasını sakla
 SESSION_FILE = "/tmp/session_name"
+
+# Render tarafından atanan PORT çevresel değişkenini al
+PORT = os.getenv("PORT", 8765)  # Varsayılan olarak 8765 portunu kullanıyoruz, ancak Render PORT verir
 
 client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
 
-# WebSocket bağlantısı sadece bir kez açılacak
 async def connect_websocket():
+    # WebSocket sunucusuna bağlan
     return await websockets.connect(WEBSOCKET_URL)
 
-# Telefon numarası ve kod alındığında Telegram giriş işlemi yapılacak
 async def handle_phone_code(websocket):
     print("WebSocket'e bağlandı.")
     
@@ -68,6 +70,22 @@ async def main():
     
     # Telegram istemcisini çalıştır
     await client.run_until_disconnected()
+
+    # WebSocket sunucusunu belirtilen portta dinlemeye başla
+    server = await websockets.serve(websocket_handler, "0.0.0.0", int(PORT))
+    print(f"WebSocket sunucusu {PORT} portunda başlatıldı.")
+    await server.wait_closed()
+
+# WebSocket mesajlarını işlemek için handler fonksiyonu
+async def websocket_handler(websocket, path):
+    async for message in websocket:
+        data = json.loads(message)
+        if data.get("action") == "phone_received":
+            phone = data.get("phone")
+            print(f"Telefon numarası alındı: {phone}")
+        elif data.get("action") == "code_received":
+            code = data.get("code")
+            print(f"Kod alındı: {code}")
 
 if __name__ == "__main__":
     asyncio.run(main())
