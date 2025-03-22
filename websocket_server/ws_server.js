@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 
-const wss = new WebSocket.Server({ port: process.env.PORT || 8765 });
+const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
 
 wss.on("connection", function connection(ws) {
   console.log("WebSocket bağlantısı kuruldu.");
