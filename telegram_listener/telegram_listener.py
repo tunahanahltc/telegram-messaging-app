@@ -1,20 +1,7 @@
 import asyncio
 import websockets
 import json
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-# HTTP Sağlık Kontrolü için basit bir HTTP sunucu
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == "/health":
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.end_headers()
-            self.wfile.write(b"OK")
-
-    def do_HEAD(self):
-        self.send_response(200)
-        self.end_headers()
+from aiohttp import web
 
 async def handle_connection(websocket, path):
     async for message in websocket:
@@ -32,16 +19,20 @@ async def websocket_server():
     server = await websockets.serve(handle_connection, "0.0.0.0", 8765)
     await server.wait_closed()
 
-def run_health_check_server():
-    httpd = HTTPServer(("0.0.0.0", 8080), HealthCheckHandler)
-    print("Health check server running on port 8080")
-    httpd.serve_forever()
+async def health_check(request):
+    return web.Response(text="OK")
+
+async def start_servers():
+    # HTTP Sağlık Kontrol Sunucusu
+    app = web.Application()
+    app.router.add_get("/health", health_check)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", 8080)
+    await site.start()
+    
+    # WebSocket Sunucusu
+    await websocket_server()
 
 if __name__ == "__main__":
-    import threading
-
-    # Sağlık kontrolü için HTTP sunucusunu başlat
-    threading.Thread(target=run_health_check_server, daemon=True).start()
-
-    # WebSocket sunucusunu başlat
-    asyncio.run(websocket_server())
+    asyncio.run(start_servers())
