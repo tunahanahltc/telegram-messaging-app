@@ -29,12 +29,17 @@ async def handle_phone_code():
                 phone = data.get("phone")
                 print("Telefon numarası alındı:", phone)
 
+                # Telegram'dan kod talep et
+                await client.connect()
+                await client.send_code_request(phone)
+                print("Telegram'a kod talep edildi.")
+
             if data.get("action") == "code_received":
                 code = data.get("code")
                 print("Telefon kodu alındı:", code)
 
                 # Telegram'a giriş yap
-                await client.start(phone=phone, code=code)
+                await client.sign_in(phone, code)
                 print("Telegram Listener başladı!")
                 break
 
